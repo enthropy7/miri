@@ -202,6 +202,13 @@ pub trait FileDescription: std::fmt::Debug + FileDescriptionExt {
         throw_unsup_format!("obtaining metadata is only supported on file-backed file descriptors");
     }
 
+    /// If this FD supports fstat but is not backed by a host file, return the
+    /// mode flag name (e.g. "S_IFCHR") for synthetic stat metadata.
+    /// FDs that return `None` (default) will use real host file metadata via `metadata()`.
+    fn synthetic_stat_mode(&self) -> Option<&'static str> {
+        None
+    }
+
     fn is_tty(&self, _communicate_allowed: bool) -> bool {
         // Most FDs are not tty's and the consequence of a wrong `false` are minor,
         // so we use a default impl here.
@@ -230,6 +237,10 @@ pub trait FileDescription: std::fmt::Debug + FileDescriptionExt {
 impl FileDescription for io::Stdin {
     fn name(&self) -> &'static str {
         "stdin"
+    }
+
+    fn synthetic_stat_mode(&self) -> Option<&'static str> {
+        Some("S_IFCHR")
     }
 
     fn read<'tcx>(
@@ -266,6 +277,10 @@ impl FileDescription for io::Stdin {
 impl FileDescription for io::Stdout {
     fn name(&self) -> &'static str {
         "stdout"
+    }
+
+    fn synthetic_stat_mode(&self) -> Option<&'static str> {
+        Some("S_IFCHR")
     }
 
     fn write<'tcx>(
@@ -305,6 +320,10 @@ impl FileDescription for io::Stdout {
 impl FileDescription for io::Stderr {
     fn name(&self) -> &'static str {
         "stderr"
+    }
+
+    fn synthetic_stat_mode(&self) -> Option<&'static str> {
+        Some("S_IFCHR")
     }
 
     fn destroy<'tcx>(
@@ -450,6 +469,10 @@ pub struct NullOutput;
 impl FileDescription for NullOutput {
     fn name(&self) -> &'static str {
         "stderr and stdout"
+    }
+
+    fn synthetic_stat_mode(&self) -> Option<&'static str> {
+        Some("S_IFCHR")
     }
 
     fn write<'tcx>(

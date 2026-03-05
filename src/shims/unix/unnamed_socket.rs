@@ -84,6 +84,13 @@ impl FileDescription for AnonSocket {
         }
     }
 
+    fn synthetic_stat_mode(&self) -> Option<&'static str> {
+        Some(match self.fd_type {
+            AnonSocketType::Socketpair => "S_IFSOCK",
+            AnonSocketType::PipeRead | AnonSocketType::PipeWrite => "S_IFIFO",
+        })
+    }
+
     fn destroy<'tcx>(
         self,
         _self_id: FdId,

@@ -119,6 +119,11 @@ impl FileDescription for Epoll {
         "epoll"
     }
 
+    fn synthetic_stat_mode(&self) -> Option<&'static str> {
+        // On Linux, epoll is an "anonymous inode" reported as S_IFREG.
+        Some("S_IFREG")
+    }
+
     fn destroy<'tcx>(
         mut self,
         self_id: FdId,

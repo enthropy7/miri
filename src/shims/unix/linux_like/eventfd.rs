@@ -37,6 +37,11 @@ impl FileDescription for EventFd {
         "event"
     }
 
+    fn synthetic_stat_mode(&self) -> Option<&'static str> {
+        // On Linux, eventfd is an "anonymous inode" reported as S_IFREG.
+        Some("S_IFREG")
+    }
+
     fn destroy<'tcx>(
         self,
         _self_id: FdId,
